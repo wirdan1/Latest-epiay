@@ -1,101 +1,92 @@
-// Particle network animation
+// Theme switching functionality
 document.addEventListener('DOMContentLoaded', function() {
-  const canvas = document.getElementById('particleCanvas');
-  const ctx = canvas.getContext('2d');
-  let particles = [];
-  const particleCount = 80;
-  const connectionDistance = 150;
-  
-  // Set canvas size
-  function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-  
-  // Create particles
-  function createParticles() {
-    particles = [];
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        radius: Math.random() * 2 + 1,
-      });
-    }
-  }
-  
-  // Draw particles and connections
-  function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Get particle color from CSS variable
-    const particleColor = getComputedStyle(document.documentElement).getPropertyValue('--particle-color');
-    
-    // Draw connections
-    for (let i = 0; i < particles.length; i++) {
-      for (let j = i + 1; j < particles.length; j++) {
-        const dx = particles[i].x - particles[j].x;
-        const dy = particles[i].y - particles[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        
-        if (distance < connectionDistance) {
-          ctx.beginPath();
-          ctx.strokeStyle = particleColor;
-          ctx.lineWidth = 0.5;
-          ctx.globalAlpha = 1 - (distance / connectionDistance);
-          ctx.moveTo(particles[i].x, particles[i].y);
-          ctx.lineTo(particles[j].x, particles[j].y);
-          ctx.stroke();
-          ctx.closePath();
-        }
-      }
-    }
-    
-    // Draw particles
-    particles.forEach(particle => {
-      ctx.beginPath();
-      ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
-      ctx.fillStyle = particleColor;
-      ctx.globalAlpha = 0.6;
-      ctx.fill();
-      ctx.closePath();
-    });
-    
-    // Update particle positions
-    particles.forEach(particle => {
-      particle.x += particle.speedX;
-      particle.y += particle.speedY;
-      
-      // Bounce off walls
-      if (particle.x < 0 || particle.x > canvas.width) particle.speedX *= -1;
-      if (particle.y < 0 || particle.y > canvas.height) particle.speedY *= -1;
-    });
-    
-    requestAnimationFrame(draw);
-  }
-  
-  createParticles();
-  draw();
-  
-  // Theme switching functionality
   const themeToggle = document.getElementById('themeToggle');
   const themeButtons = document.querySelectorAll('.theme-btn[data-theme]');
-  const currentTheme = localStorage.getItem('theme') || 'light';
+  
+  // Check for saved theme preference or use preferred color scheme
+  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+  const currentTheme = localStorage.getItem('theme') || (prefersDarkScheme.matches ? 'dark' : 'light');
   
   // Set initial theme
   document.documentElement.setAttribute('data-theme', currentTheme);
   
+  // Toggle menu on click
+  themeToggle.addEventListener('click', function(e) {
+    e.stopPropagation();
+    this.classList.toggle('active');
+  });
+  
+  // Close menu when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!themeToggle.contains(e.target)) {
+      themeToggle.classList.remove('active');
+    }
+  });
+  
   // Theme button event listeners
   themeButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const theme = button.getAttribute('data-theme');
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const theme = this.getAttribute('data-theme');
       document.documentElement.setAttribute('data-theme', theme);
       localStorage.setItem('theme', theme);
+      themeToggle.classList.remove('active');
     });
   });
+  
+  // Add scroll animation to elements
+  const animateOnScroll = function() {
+    const elements = document.querySelectorAll('.benefit-card, .feature-item, .stat-item');
+    
+    elements.forEach(element => {
+      const elementPosition = element.getBoundingClientRect().top;
+      const screenPosition = window.innerHeight / 1.3;
+      
+      if (elementPosition < screenPosition) {
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+      }
+    });
+  };
+  
+  // Initialize animation styles
+  const initAnimations = function() {
+    const elements = document.querySelectorAll('.benefit-card, .feature-item, .stat-item');
+    
+    elements.forEach(element => {
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(20px)';
+      element.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    });
+    
+    // Animate logo on load
+    const logo = document.querySelector('.logo-icon');
+    if (logo) {
+      logo.style.transform = 'scale(0)';
+      logo.style.transition = 'transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      
+      setTimeout(() => {
+        logo.style.transform = 'scale(1)';
+      }, 300);
+    }
+    
+    window.addEventListener('scroll', animateOnScroll);
+    // Trigger once on load
+    setTimeout(animateOnScroll, 500);
+  };
+  
+  // Initialize animations
+  initAnimations();
+  
+  // Add hover effect to CTA button
+  const ctaButton = document.querySelector('.cta-button');
+  if (ctaButton) {
+    ctaButton.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-5px) scale(1.05)';
+    });
+    
+    ctaButton.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+  }
 });
