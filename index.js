@@ -6,7 +6,7 @@
   const os = require("os");
   const app = express();
   const PORT = process.env.PORT || 3355;
-  const API_KEY = "wudysoft";
+  const API_KEY = "hookrest";
   const API_KEY_RESET_MONTH = 1;
   const API_KEY_GRACE_PERIOD = 2;
   const API_LIMIT = 8e4;
