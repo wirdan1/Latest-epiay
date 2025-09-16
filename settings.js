@@ -1,14 +1,14 @@
 module.exports = {
   name: {
-    main: "Wudysoft API",
-    copyright: "Wudysoft API"
+    main: "Hookrest API",
+    copyright: "Hookrest Team"
   },
   description: "Integrated API solution for your modern application development needs. Fast, secure, and reliable access.",
   icon: "/image/icon.png",
-  author: "Wudysoft",
-  info_url: "https://whatsapp.com/channel/0029Vb0v3F71yT264EejzJ3e",
+  author: "Hookrest-Team",
+  info_url: "https://whatsapp.com/channel/0029Vb5CxIfAjPXInV7XWz38",
   links: [{
     name: "Channel WhatsApp Inf.",
-    url: "https://whatsapp.com/channel/0029Vb0v3F71yT264EejzJ3e"
+    url: "https://whatsapp.com/channel/0029Vb5CxIfAjPXInV7XWz38"
   }]
 };
