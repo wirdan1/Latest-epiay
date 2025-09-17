@@ -5,110 +5,638 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="REST API praktis untuk pengembangan aplikasi dan BOT WA - Hookrest">
-  <link rel="icon" href="/image/icon.png" type="image/png">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23646cff' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-8 8z'/%3E%3C/svg%3E" type="image/svg+xml">
   <title>Hookrest API</title>
-  <link rel="stylesheet" href="style.css">
+  <!-- Font Inter dengan fallback yang lebih baik -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #646cff;
+      --primary-dark: #5652ff;
+      --secondary: #8b5cf6;
+      --dark: #1a1a1a;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --gray-light: #e2e8f0;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --radius: 12px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      /* Menambahkan fallback font untuk optimasi */
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      color: var(--dark);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      padding: 20px 0;
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: var(--primary);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-icon {
+      margin-right: 10px;
+      font-size: 2rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+    }
+
+    .nav-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      letter-spacing: 0.2px;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--dark);
+    }
+
+    .hero {
+      padding: 80px 0;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 3.5rem;
+      font-weight: 800;
+      margin-bottom: 20px;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -1px;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--gray);
+      max-width: 700px;
+      margin: 0 auto 40px;
+      font-weight: 400;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 80px;
+    }
+
+    .feature-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      transition: var(--transition);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: var(--light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: var(--primary);
+      font-size: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .feature-card p {
+      color: var(--gray);
+    }
+
+    .cta {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: white;
+      padding: 80px 0;
+      text-align: center;
+      border-radius: var(--radius);
+      margin-bottom: 80px;
+    }
+
+    .cta h2 {
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .cta p {
+      max-width: 600px;
+      margin: 0 auto 40px;
+      font-size: 1.1rem;
+      font-weight: 400;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--primary);
+      color: white;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: 600;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      font-size: 1rem;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -5px rgba(100, 108, 255, 0.3);
+    }
+
+    .btn i {
+      margin-left: 8px;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+    }
+
+    .btn-outline:hover {
+      background: white;
+      color: var(--primary);
+    }
+
+    .api-info {
+      margin-bottom: 80px;
+    }
+
+    .api-info h2 {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 50px;
+      font-weight: 700;
+    }
+
+    .endpoints {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .endpoint-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 25px;
+      box-shadow: var(--shadow);
+    }
+
+    .endpoint-method {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+    }
+
+    .method-get {
+      background: #e9f5ff;
+      color: #0066cc;
+    }
+
+    .method-post {
+      background: #e6f7ee;
+      color: #069a55;
+    }
+
+    .endpoint-url {
+      font-family: 'Consolas', 'Monaco', 'Andale Mono', 'Ubuntu Mono', monospace;
+      background: var(--light);
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      overflow-x: auto;
+      font-size: 0.9rem;
+    }
+
+    .audio-player {
+      background: white;
+      border-radius: var(--radius);
+      padding: 30px;
+      box-shadow: var(--shadow);
+      margin-bottom: 80px;
+      transition: var(--transition);
+      opacity: 1;
+      max-height: 1000px;
+      overflow: hidden;
+    }
+
+    .audio-player.hidden {
+      opacity: 0;
+      max-height: 0;
+      padding: 0 30px;
+      margin-bottom: 0;
+      pointer-events: none;
+    }
+
+    .audio-toggle {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .toggle-btn {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-weight: 600;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .audio-player h2 {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 30px;
+      font-weight: 700;
+    }
+
+    .tracks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .track {
+      background: var(--light);
+      border-radius: var(--radius);
+      padding: 20px;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .track:hover {
+      background: #f1f5f9;
+    }
+
+    .track h3 {
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 15px;
+      border-radius: 30px;
+    }
+
+    /* Custom audio player styling */
+    audio::-webkit-media-controls-panel {
+      background-color: #f8fafc;
+      border-radius: 30px;
+    }
+    
+    footer {
+      background: var(--dark);
+      color: white;
+      padding: 60px 0 30px;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+
+    .footer-logo {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: block;
+      letter-spacing: -0.5px;
+    }
+
+    .footer-links h4 {
+      margin-bottom: 20px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .footer-links ul {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+
+    .footer-links a {
+      color: #cbd5e1;
+      text-decoration: none;
+      transition: var(--transition);
+      font-weight: 400;
+    }
+
+    .footer-links a:hover {
+      color: white;
+    }
+
+    .copyright {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid #334155;
+      color: #94a3b8;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: white;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+      
+      .nav-links.active {
+        display: flex;
+      }
+      
+      .mobile-menu-btn {
+        display: block;
+      }
+      
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+      
+      .hero p {
+        font-size: 1.1rem;
+      }
+      
+      .audio-player {
+        padding: 20px;
+      }
+      
+      .toggle-btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <div class="background-container">
-    <div class="background-overlay"></div>
-    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&h=1080&q=80" alt="Background" class="background-image">
-  </div>
-
-  <div class="theme-toggle" id="themeToggle">
-    <div class="hamburger-menu">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-    <div class="theme-menu">
-      <button class="theme-btn light-theme" data-theme="light">
-        <i class="material-icons">light_mode</i>
-        Light Mode
-      </button>
-      <button class="theme-btn dark-theme" data-theme="dark">
-        <i class="material-icons">dark_mode</i>
-        Dark Mode
-      </button>
-      <a href="https://github.com/Wirdan1" class="theme-btn" target="_blank">
-        <i class="fab fa-github"></i>
-        GitHub
+  <header>
+    <div class="container nav-container">
+      <a href="#" class="logo">
+        <i class="material-icons logo-icon">api</i>
+        Hookrest
       </a>
-      <a href="https://youtube.danz-dev/" class="theme-btn" target="_blank">
-        <i class="fab fa-youtube"></i>
-        YouTube
-      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="/docs">Documentation</a>
+        <a href="https://github.com/Wirdan1">GitHub</a>
+      </nav>
+      <button class="mobile-menu-btn">
+        <i class="material-icons">menu</i>
+      </button>
     </div>
-  </div>
+  </header>
 
-  <div class="container">
-    <div class="content-box">
-      <div class="content-wrapper">
-        <div class="logo-icon">
-          <i class="material-icons">api</i>
+  <main class="container">
+    <section class="hero">
+      <h1>Modern REST API for Developers</h1>
+      <p>Hookrest provides a powerful, reliable, and easy-to-use REST API to accelerate your application development process.</p>
+      <a href="/docs" class="btn">
+        View Documentation <i class="material-icons">arrow_forward</i>
+      </a>
+    </section>
+
+    <section class="features" id="features">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="material-icons">bolt</i>
         </div>
-        <h1>Hookrest API</h1>
-        <p class="description">Selamat datang di Hookrest API — REST API praktis untuk mempercepat dan mempermudah pengembangan aplikasi Anda.</p>
-        
-        <div class="features">
-          <div class="feature-item">
-            <div class="feature-dot fast"></div>
-            <span>Fast</span>
-          </div>
-          <div class="feature-item">
-            <div class="feature-dot reliable"></div>
-            <span>Reliable</span>
-          </div>
-          <div class="feature-item">
-            <div class="feature-dot secure"></div>
-            <span>Secure</span>
-          </div>
+        <h3>Lightning Fast</h3>
+        <p>Our API is built on a high-performance infrastructure with response times under 50ms.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="material-icons">security</i>
         </div>
-        
-        <a href="/docs" class="cta-button">
-          View Documentation
-          <i class="material-icons">arrow_forward</i>
-        </a>
-        
-        <div class="benefits-section">
-          <h2>Mengapa Memilih Hookrest API?</h2>
-          <div class="benefits-grid">
-            <div class="benefit-card">
-              <i class="material-icons">speed</i>
-              <h3>Performa Tinggi</h3>
-              <p>Dibangun dengan teknologi terbaru untuk respons yang cepat dan handal.</p>
-            </div>
-            <div class="benefit-card">
-              <i class="material-icons">security</i>
-              <h3>Keamanan Terjamin</h3>
-              <p>Protokol keamanan tingkat enterprise melindungi data Anda.</p>
-            </div>
-            <div class="benefit-card">
-              <i class="material-icons">integration_instructions</i>
-              <h3>Integrasi Mudah</h3>
-              <p>Dokumentasi lengkap dan SDK untuk berbagai platform.</p>
-            </div>
-            <div class="benefit-card">
-              <i class="material-icons">scale</i>
-              <h3>Skalabilitas</h3>
-              <p>Mendukung pertumbuhan bisnis Anda dengan infrastruktur yang scalable.</p>
-            </div>
-          </div>
+        <h3>Secure & Reliable</h3>
+        <p>Enterprise-grade security with SSL encryption and 99.9% uptime guarantee.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="material-icons">code</i>
         </div>
-        <div class="footer-links">
-          <a href="https://github.com/Wirdan1" target="_blank">GitHub</a>
-          <a href="https://youtube.danz-dev/" target="_blank">Youtube Download</a>
-          <a href="/user/apicek?=&apikey=hookrest">API Status</a>
-          <a href="/docs/obfus.html">Obfuscate</a>
+        <h3>Developer Friendly</h3>
+        <p>Comprehensive documentation, SDKs, and code examples for all major languages.</p>
+      </div>
+    </section>
+
+    <div class="audio-toggle">
+      <button id="toggleAudio" class="toggle-btn">
+        <i class="material-icons">volume_up</i>
+        <span>Show Background Music</span>
+      </button>
+    </div>
+
+    <section class="audio-player hidden" id="audioPlayer">
+      <h2>Background Music</h2>
+      <div class="tracks">
+        <div class="track">
+          <h3>Love nwantiti</h3>
+          <audio controls>
+            <source src="https://qu.ax/MMtYy.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+        <div class="track">
+          <h3>Blue</h3>
+          <audio controls>
+            <source src="https://qu.ax/dhHBV.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+        <div class="track">
+          <h3>Bonus</h3>
+          <audio controls>
+            <source src="https://qu.ax/BTStv.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <script src="script.js"></script>
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div>
+          <span class="footer-logo">Hookrest</span>
+          <p>Modern REST API solutions for developers and businesses of all sizes.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="/docs">Documentation</a></li>
+            <li><a href="/status">API Status</a></li>
+          </ul>
+        </div>
+        <div class="footer-links">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/about">About Us</a></li>
+            <li><a href="/careers">Careers</a></li>
+            <li><a href="/contact">Contact</a></li>
+            <li><a href="/privacy">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="copyright">
+        <p>&copy; 2025 Hookrest API. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Mobile menu toggle
+    const menuBtn = document.querySelector('.mobile-menu-btn');
+    const navLinks = document.querySelector('.nav-links');
+    
+    menuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.nav-container')) {
+        navLinks.classList.remove('active');
+      }
+    });
+    
+    // Smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const targetId = this.getAttribute('href');
+        if (targetId === '#') return;
+        
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          window.scrollTo({
+            top: targetElement.offsetTop - 80,
+            behavior: 'smooth'
+          });
+          
+          // Close mobile menu if open
+          navLinks.classList.remove('active');
+        }
+      });
+    });
+
+    // Audio player toggle
+    const toggleBtn = document.getElementById('toggleAudio');
+    const audioPlayer = document.getElementById('audioPlayer');
+    
+    toggleBtn.addEventListener('click', () => {
+      audioPlayer.classList.toggle('hidden');
+      
+      if (audioPlayer.classList.contains('hidden')) {
+        toggleBtn.innerHTML = '<i class="material-icons">volume_up</i><span>Show Background Music</span>';
+      } else {
+        toggleBtn.innerHTML = '<i class="material-icons">volume_off</i><span>Hide Background Music</span>';
+      }
+    });
+  </script>
 </body>
 
 </html>
