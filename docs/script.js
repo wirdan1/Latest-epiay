@@ -226,20 +226,13 @@ document.addEventListener("DOMContentLoaded", async function() {
     apiMethod.textContent = method || "GET";
     apiMethod.className = `method-badge ${method === 'POST' ? 'method-post' : 'method-get'} mr-2`;
     
-    const apiKeyField = document.createElement("div");
-    apiKeyField.innerHTML = `
-      <label class="block text-sm font-medium text-slate-700 mb-1">API Key</label>
-      <input type="text" id="param-apikey" class="input-field" value="yoedzx" placeholder="Enter your API key">
-      <div id="error-apikey" class="text-red-500 text-xs mt-1 hidden">API key is required</div>
-    `;
-    paramsContainer.appendChild(apiKeyField);
-    
     const url = new URL(endpoint, window.location.origin);
     const urlParams = url.search ? url.search.substring(1).split("&") : [];
     
+    // Handle query parameters
     urlParams.forEach(param => {
       const [key] = param.split("=");
-      if (key && key !== "apikey") {
+      if (key) {
         const isOptional = key.startsWith("_");
         const paramField = document.createElement("div");
         paramField.innerHTML = `
@@ -250,6 +243,22 @@ document.addEventListener("DOMContentLoaded", async function() {
         paramsContainer.appendChild(paramField);
       }
     });
+
+    // Handle path parameters (placeholders like {param})
+    const placeholderMatch = endpoint.match(/{([^}]+)}/g);
+    if (placeholderMatch) {
+      placeholderMatch.forEach(match => {
+        const paramName = match.replace(/{|}/g, "");
+        const isOptional = paramName.startsWith("_");
+        const paramField = document.createElement("div");
+        paramField.innerHTML = `
+          <label class="block text-sm font-medium text-slate-700 mb-1">${paramName.capitalize()}</label>
+          <input type="text" id="param-${paramName}" class="input-field" placeholder="Enter ${paramName}${isOptional ? " (optional)" : ""}">
+          <div id="error-${paramName}" class="text-red-500 text-xs mt-1 hidden">This field is required</div>
+        `;
+        paramsContainer.appendChild(paramField);
+      });
+    }
     
     // Show modal
     modal.classList.add("active");
@@ -275,17 +284,24 @@ document.addEventListener("DOMContentLoaded", async function() {
     
     submitApiBtn.onclick = async function() {
       let isValid = true;
-      const apiKeyInput = document.getElementById("param-apikey");
-      const apiKeyError = document.getElementById("error-apikey");
-      
-      if (!apiKeyInput.value.trim()) {
-        isValid = false;
-        apiKeyError.classList.remove("hidden");
-        apiKeyInput.classList.add("border-red-500");
-      } else {
-        apiKeyError.classList.add("hidden");
-        apiKeyInput.classList.remove("border-red-500");
-      }
+      document.querySelectorAll('[id^="error-"]').forEach(errorElement => {
+        errorElement.classList.add("hidden");
+      });
+
+      const paramInputs = paramsContainer.querySelectorAll("input");
+      paramInputs.forEach(input => {
+        const paramName = input.id.replace("param-", "");
+        const paramValue = input.value.trim();
+        const errorElement = document.getElementById(`error-${paramName}`);
+        if (!paramName.startsWith("_") && paramValue === "") {
+          isValid = false;
+          errorElement.classList.remove("hidden");
+          input.classList.add("border-red-500");
+        } else {
+          errorElement.classList.add("hidden");
+          input.classList.remove("border-red-500");
+        }
+      });
       
       if (!isValid) return;
       
@@ -297,17 +313,33 @@ document.addEventListener("DOMContentLoaded", async function() {
       
       try {
         let apiUrl = endpoint;
-        const separator = apiUrl.includes("?") ? "&" : "?";
-        apiUrl = `${apiUrl}${separator}apikey=${encodeURIComponent(apiKeyInput.value.trim())}`;
         
-        const paramInputs = paramsContainer.querySelectorAll("input");
+        // Replace path parameters
         paramInputs.forEach(input => {
-          const key = input.id.replace("param-", "");
-          const value = input.value.trim();
-          if (key !== "apikey" && value !== "") {
-            apiUrl += `&${encodeURIComponent(key)}=${encodeURIComponent(value)}`;
+          const paramName = input.id.replace("param-", "");
+          const paramValue = input.value.trim();
+          if (paramName.startsWith("_") && paramValue === "") {
+            return;
+          }
+          if (apiUrl.includes(`{${paramName}}`)) {
+            apiUrl = apiUrl.replace(`{${paramName}}`, encodeURIComponent(paramValue));
+          } else if (paramValue !== "") {
+            const urlObj = new URL(apiUrl, window.location.origin);
+            urlObj.searchParams.set(paramName, paramValue);
+            apiUrl = urlObj.pathname + urlObj.search;
           }
         });
+        
+        const fullUrl = new URL(apiUrl, window.location.origin).href;
+        const urlDisplayDiv = document.createElement("div");
+        urlDisplayDiv.className = "urlDisplay mb-4 p-3 bg-gray-50 font-mono text-xs overflow-hidden";
+        const urlContent = document.createElement("div");
+        urlContent.className = "break-all";
+        urlContent.textContent = fullUrl;
+        urlDisplayDiv.appendChild(urlContent);
+        responseContainer.parentNode.insertBefore(urlDisplayDiv, responseContainer);
+        
+        responseData.innerHTML = "Loading...";
         
         const requestOptions = {
           method: "GET",
@@ -330,12 +362,36 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
         
         const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
+        if (contentType && (contentType.includes("image/") || contentType.includes("video/") || contentType.includes("audio/") || contentType.includes("application/octet-stream"))) {
+          const blob = await response.blob();
+          const objectUrl = URL.createObjectURL(blob);
+          if (contentType.includes("image/")) {
+            responseData.innerHTML = `<img src='${objectUrl}' alt='Response Image' class='max-w-full h-auto' />`;
+          } else if (contentType.includes("video/")) {
+            responseData.innerHTML = `
+              <video controls class='max-w-full'>
+                <source src='${objectUrl}' type='${contentType}'>
+                Your browser does not support the video tag.
+              </video>`;
+          } else if (contentType.includes("audio/")) {
+            responseData.innerHTML = `
+              <audio controls class='w-full'>
+                <source src='${objectUrl}' type='${contentType}'>
+                Your browser does not support the audio tag.
+              </audio>`;
+          } else {
+            responseData.innerHTML = `
+              <div class='text-center p-4'>
+                <p class='mb-2'>Binary data received (${blob.size} bytes)</p>
+                <a href='${objectUrl}' download='response-data' class='px-4 py-2 bg-blue-500 text-white hover:bg-blue-600'>Download File</a>
+              </div>`;
+          }
+        } else if (contentType && contentType.includes("application/json")) {
           const jsonData = await response.json();
-          responseData.textContent = JSON.stringify(jsonData, null, 2);
+          responseData.innerHTML = `<pre class='whitespace-pre-wrap break-words'>${JSON.stringify(jsonData, null, 2)}</pre>`;
         } else {
           const text = await response.text();
-          responseData.textContent = text;
+          responseData.innerHTML = `<pre class='whitespace-pre-wrap break-words'>${text}</pre>`;
         }
       } catch (error) {
         const endTime = Date.now();
@@ -355,7 +411,7 @@ document.addEventListener("DOMContentLoaded", async function() {
               </div>
               <div class="ml-3">
                 <p class="text-sm text-red-700">
-                  ${error.message || "Invalid API key - please use ?apikey=hookrest"}
+                  ${error.message || "Invalid API key - please use a valid API key"}
                 </p>
               </div>
             </div>
