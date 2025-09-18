@@ -22,11 +22,15 @@ module.exports = {
         prompt
       )}?seed=${seed}&enhance=true&nologo=true&model=flux`;
 
-      res.json({
-        status: true,
-        prompt,
-        image: imageUrl,
+      // ambil gambar langsung sebagai buffer
+      const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
+
+      res.writeHead(200, {
+        "Content-Type": response.headers["content-type"] || "image/png",
+        "Content-Length": response.data.length,
       });
+      res.end(response.data);
+
     } catch (error) {
       res.status(500).json({
         status: false,
