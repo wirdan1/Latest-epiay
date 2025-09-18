@@ -1,27 +1,113 @@
-# YoedzKey
+# 🌐 Hookrest API
 
-**YoedzKey** is a simple, yet powerful and highly customizable REST API foundation. Built with Express.js, it provides developers with a solid starting point to create their own API services with minimal setup and maximum flexibility.
+![Hookrest API](https://img.shields.io/badge/API-Hookrest-blueviolet?style=for-the-badge&logo=node.js)
+![Version](https://img.shields.io/badge/version-1.0.0-green?style=for-the-badge)
+![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)
 
-## Features
+**Integrated API solution for your modern application development needs. Fast, secure, and reliable access.**
 
-- **Simple & Lightweight**: Easy to understand codebase with minimal dependencies
-- **Auto-Discovery**: Automatic endpoint registration
-- **Dynamic Module Loading**: Hot-reload capability for API modules
-- **Well-Organized Structure**: Category-based endpoint organization
-- **Scraper Integration**: Ready-to-use scraper module for web data extraction
-- **Network Ready**: Automatic detection of network interfaces for easier testing
+## ✨ Features
 
-## Requirements
+- 🚀 **High Performance**: Optimized for speed and efficiency
+- 🔒 **Secure**: Built with security best practices
+- 📊 **Comprehensive**: Multiple endpoints for various needs
+- 🔌 **Extensible**: Plugin-based architecture for customization
+- 📱 **Modern**: RESTful design with JSON responses
+- 🔍 **Detailed Analytics**: Built-in statistics and monitoring
 
-- Node.js (v18 or higher)
-- NPM or Yarn
+## 🏗️ Project Structure
 
-## Quick Start
+```
+hookrest-api/
+├── 📁 plugins/          # Custom plugins directory
+├── 📁 categories/       # API categories
+│   ├── 📁 User/        # User-related endpoints
+│   ├── 📁 Products/    # Product-related endpoints
+│   └── 📁 Analytics/   # Analytics endpoints
+├── ⚙️ settings.js       # Configuration settings
+├── 🚀 server.js        # Main server file
+└── 📄 package.json     # Dependencies and scripts
+```
+
+## ⚙️ Configuration
+
+The API is configured through `settings.js`:
+
+```javascript
+module.exports = {
+  name: {
+    main: "Hookrest API",
+    copyright: "Hookrest Team"
+  },
+  description: "Integrated API solution for your modern application development needs. Fast, secure, and reliable access.",
+  icon: "/image/icon.png",
+  author: "Hookrest-Team",
+  info_url: "https://whatsapp.com/channel/0029Vb5CxIfAjPXInV7XWz38",
+  links: [{
+    name: "Channel WhatsApp Inf.",
+    url: "https://whatsapp.com/channel/0029Vb5CxIfAjPXInV7XWz38"
+  }]
+};
+```
+
+## 🔌 Plugin System
+
+Hookrest API features a powerful plugin system. Here's an example plugin that counts API endpoints:
+
+```javascript
+const fs = require("fs");
+const path = require("path");
+
+module.exports = {
+  name: "Total Api",
+  desc: "Menampilkan total semua fitur di semua kategori",
+  category: "User",
+  async run(req, res) {
+    try {
+      const baseDir = path.join(__dirname, "..");
+      const categories = fs.readdirSync(baseDir).filter(file => {
+        const fullPath = path.join(baseDir, file);
+        return fs.statSync(fullPath).isDirectory();
+      });
+      
+      let total = 0;
+      const detail = {};
+      
+      for (const category of categories) {
+        const categoryDir = path.join(baseDir, category);
+        const files = fs.readdirSync(categoryDir).filter(f => f.endsWith(".js"));
+        total += files.length;
+        detail[category] = files.length;
+      }
+      
+      res.json({
+        status: true,
+        total: total,
+        perKategori: detail
+      });
+    } catch (err) {
+      res.status(500).json({
+        status: false,
+        message: err.message
+      });
+    }
+  }
+};
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+
+### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/rynxzyy/Hiuraa-API-Base.git
-cd Hiuraa-API-Base
+git clone https://github.com/hookrest-team/hookrest-api.git
+cd hookrest-api
 ```
 
 2. Install dependencies:
@@ -29,90 +115,125 @@ cd Hiuraa-API-Base
 npm install
 ```
 
-3. Modify the `settings.js` file:
-```javascript
-module.exports = {
-module.exports = {
-    name: {
-        main: 'YoedzXy Api',
-        copyright: 'YoedzXy Api Xion'
-    },
-    description: 'Integrated API solution for your modern application development needs. Fast, secure, and reliable access.',
-    icon: '/image/icon.png',
-    author: 'Yudz',
-    info_url: 'https://whatsapp.com/channel/0029Vb0v3F71yT264EejzJ3e',
-    links: [
-        {
-            name: 'Channel WhatsApp Inf.',
-            url: 'https://whatsapp.com/channel/0029Vb0v3F71yT264EejzJ3e'
-        }
-    ]
-};
-```
-
-4. Start the server:
+3. Start the server:
 ```bash
 npm start
 ```
 
-Visit `http://localhost:4000` to see your API in action!
+For development with auto-restart:
+```bash
+npm run dev
+```
 
-## Deploy to Vercel
+### Environment Variables
 
-You can easily deploy your Hiuraa API to Vercel:
+Create a `.env` file in the root directory:
 
-1. Click the deploy button below:
+```env
+PORT=3000
+NODE_ENV=development
+API_KEY=your_secret_key_here
+```
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Frynxzyy%2FHiuraa-API-Base)
+## 📡 API Endpoints
 
-2. Follow the on-screen instructions
-3. Configure environment variables if needed
-4. Deploy!
+### Base URL
+```
+https://api.hookrest.com/v1
+```
 
-## Creating Endpoints
+### Example Endpoints
 
-Creating new endpoints is simple. Just add a JavaScript file to the `api` directory:
+| Endpoint | Method | Description | Parameters |
+|----------|--------|-------------|------------|
+| `/api/total` | GET | Get total API count | None |
+| `/api/users` | GET | Get user list | `limit`, `offset` |
+| `/api/users/:id` | GET | Get user by ID | `id` |
 
+### Example Request
+
+```bash
+curl -X GET "https://api.hookrest.com/v1/api/total" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+### Example Response
+
+```json
+{
+  "status": true,
+  "total": 42,
+  "perKategori": {
+    "User": 15,
+    "Products": 20,
+    "Analytics": 7
+  }
+}
+```
+
+## 🛠️ Development
+
+### Adding New Endpoints
+
+1. Create a new file in the appropriate category directory
+2. Follow the plugin structure:
 ```javascript
 module.exports = {
-    name: "Hello World",
-    desc: "Returns a friendly greeting",
-    category: "Greetings",
-    params: ["name"],
-    async run(req, res) {
-        const name = req.query.name || "World";
-        res.json({
-            status: true,
-            message: `Hello, ${name}!`
-        });
-    }
+  name: "Endpoint Name",
+  desc: "Description of what the endpoint does",
+  category: "CategoryName",
+  async run(req, res) {
+    // Your implementation here
+  }
 };
 ```
 
-This automatically creates an endpoint at `/greetings/hello-world` with proper documentation.
+### Custom Plugins
 
-## Key Features Explained
+You can create custom plugins in the `plugins/` directory. These will be automatically loaded by the system.
 
-### Automatic Endpoint Registration
+## 🔒 Security
 
-The system will automatically:
-- Discover and register all `.js` files in the `api` directory and subdirectories
-- Generate documentation based on module properties
-- Organize endpoints by categories
-- Display URLs with required parameters
+Hookrest API includes several security features:
+- API key authentication
+- Rate limiting
+- CORS configuration
+- Input validation
+- SQL injection protection
 
-### Scraper Module
+## 📊 Monitoring
 
-A built-in scraper system that:
-- Auto-loads from the `lib/scrape_file` directory
-- Hot-reloads on changes (every 2 seconds)
-- Provides a global `scraper` object
+The API includes built-in monitoring capabilities:
+- Request logging
+- Performance metrics
+- Error tracking
+- Usage statistics
 
-## License
+## 🤝 Contributing
 
-[MIT License](LICENSE) - Feel free to use and modify according to your needs.
+We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details.
 
-## Author
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-Created by Yoedz.
-Feel free to contribute, report issues, or suggest improvements!
+## 📞 Support
+
+For support and information:
+- Join our [WhatsApp Channel](https://whatsapp.com/channel/0029Vb5CxIfAjPXInV7XWz38)
+- Create an issue in the GitHub repository
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- Hookrest Team
+- All contributors and supporters
+
+---
+
+**Hookrest API** · Built with ❤️ by the Hookrest Team · [WhatsApp Channel](https://whatsapp.com/channel/0029Vb5CxIfAjPXInV7XWz38)
