@@ -336,11 +336,30 @@ document.addEventListener("DOMContentLoaded", async function() {
         
         const fullUrl = new URL(apiUrl, window.location.origin).href;
         const urlDisplayDiv = document.createElement("div");
-        urlDisplayDiv.className = "urlDisplay mb-4 p-3 bg-gray-50 font-mono text-xs overflow-hidden";
+        urlDisplayDiv.className = "urlDisplay mb-4 p-3 bg-gray-50 font-mono text-xs overflow-hidden relative";
         const urlContent = document.createElement("div");
         urlContent.className = "break-all";
         urlContent.textContent = fullUrl;
         urlDisplayDiv.appendChild(urlContent);
+        
+        // Add Copy Button for Endpoint
+        const copyUrlButton = document.createElement("button");
+        copyUrlButton.className = "btn btn-icon absolute top-2 right-2";
+        copyUrlButton.innerHTML = '<span class="material-icons text-base">content_copy</span>';
+        copyUrlButton.title = "Copy Endpoint URL";
+        copyUrlButton.onclick = async function() {
+          try {
+            await navigator.clipboard.writeText(fullUrl);
+            copyUrlButton.innerHTML = '<span class="material-icons text-base">check</span>';
+            setTimeout(() => {
+              copyUrlButton.innerHTML = '<span class="material-icons text-base">content_copy</span>';
+            }, 2000);
+          } catch (err) {
+            console.error("Failed to copy URL:", err);
+          }
+        };
+        urlDisplayDiv.appendChild(copyUrlButton);
+        
         responseContainer.parentNode.insertBefore(urlDisplayDiv, responseContainer);
         
         responseData.innerHTML = "Loading...";
@@ -366,6 +385,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         }
         
         const contentType = response.headers.get("content-type");
+        let responseText = "";
+        
         if (contentType && (contentType.includes("image/") || contentType.includes("video/") || contentType.includes("audio/") || contentType.includes("application/octet-stream"))) {
           const blob = await response.blob();
           const objectUrl = URL.createObjectURL(blob);
@@ -390,13 +411,35 @@ document.addEventListener("DOMContentLoaded", async function() {
                 <a href='${objectUrl}' download='response-data' class='px-4 py-2 bg-blue-500 text-white hover:bg-blue-600'>Download File</a>
               </div>`;
           }
+          responseText = `Binary data (${contentType})`;
         } else if (contentType && contentType.includes("application/json")) {
           const jsonData = await response.json();
-          responseData.innerHTML = `<pre class='whitespace-pre-wrap break-words'>${JSON.stringify(jsonData, null, 2)}</pre>`;
+          responseText = JSON.stringify(jsonData, null, 2);
+          responseData.innerHTML = `<pre class='whitespace-pre-wrap break-words'>${responseText}</pre>`;
         } else {
-          const text = await response.text();
-          responseData.innerHTML = `<pre class='whitespace-pre-wrap break-words'>${text}</pre>`;
+          responseText = await response.text();
+          responseData.innerHTML = `<pre class='whitespace-pre-wrap break-words'>${responseText}</pre>`;
         }
+        
+        // Add Copy Button for Response
+        const copyResponseButton = document.createElement("button");
+        copyResponseButton.className = "btn btn-icon absolute top-2 right-2";
+        copyResponseButton.innerHTML = '<span class="material-icons text-base">content_copy</span>';
+        copyResponseButton.title = "Copy Response";
+        copyResponseButton.onclick = async function() {
+          try {
+            await navigator.clipboard.writeText(responseText);
+            copyResponseButton.innerHTML = '<span class="material-icons text-base">check</span>';
+            setTimeout(() => {
+              copyResponseButton.innerHTML = '<span class="material-icons text-base">content_copy</span>';
+            }, 2000);
+          } catch (err) {
+            console.error("Failed to copy response:", err);
+          }
+        };
+        responseData.classList.add("relative");
+        responseData.appendChild(copyResponseButton);
+        
       } catch (error) {
         const endTime = Date.now();
         const duration = endTime - startTime;
@@ -405,8 +448,9 @@ document.addEventListener("DOMContentLoaded", async function() {
         responseStatus.className = "method-badge method-post mr-2";
         responseTime.textContent = `${duration}ms`;
         
+        const errorText = error.message || "Invalid API key - please use a valid API key";
         responseData.innerHTML = `
-          <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded">
+          <div class="p-3 bg-red-50 border-l-4 border-red-500 rounded relative">
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
@@ -414,13 +458,27 @@ document.addEventListener("DOMContentLoaded", async function() {
                 </svg>
               </div>
               <div class="ml-3">
-                <p class="text-sm text-red-700">
-                  ${error.message || "Invalid API key - please use a valid API key"}
-                </p>
+                <p class="text-sm text-red-700">${errorText}</p>
               </div>
             </div>
+            <button class="btn btn-icon absolute top-2 right-2" title="Copy Error Message">
+              <span class="material-icons text-base">content_copy</span>
+            </button>
           </div>
         `;
+        
+        const copyErrorButton = responseData.querySelector("button");
+        copyErrorButton.onclick = async function() {
+          try {
+            await navigator.clipboard.writeText(errorText);
+            copyErrorButton.innerHTML = '<span class="material-icons text-base">check</span>';
+            setTimeout(() => {
+              copyErrorButton.innerHTML = '<span class="material-icons text-base">content_copy</span>';
+            }, 2000);
+          } catch (err) {
+            console.error("Failed to copy error message:", err);
+          }
+        };
       }
     };
   }
