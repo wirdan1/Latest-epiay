@@ -15,20 +15,6 @@
 - 📱 **Modern**: RESTful design with JSON responses
 - 🔍 **Detailed Analytics**: Built-in statistics and monitoring
 
-## 🏗️ Project Structure
-
-```
-hookrest-api/
-├── 📁 plugins/          # Custom plugins directory
-├── 📁 categories/       # API categories
-│   ├── 📁 User/        # User-related endpoints
-│   ├── 📁 Products/    # Product-related endpoints
-│   └── 📁 Analytics/   # Analytics endpoints
-├── ⚙️ settings.js       # Configuration settings
-├── 🚀 server.js        # Main server file
-└── 📄 package.json     # Dependencies and scripts
-```
-
 ## ⚙️ Configuration
 
 The API is configured through `settings.js`:
