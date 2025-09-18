@@ -8,7 +8,7 @@ async function getBuffer(url) {
 module.exports = {
   name: "RandomNSFW",
   desc: "Ambil gambar NSFW random (blowjob, neko, trap, waifu)",
-  category: "random",
+  category: "Random",
   params: [],
   async run(req, res) {
     try {
