@@ -230,20 +230,22 @@ document.addEventListener("DOMContentLoaded", async function() {
     const urlParams = url.search ? url.search.substring(1).split("&") : [];
     
     // Handle query parameters
-    urlParams.forEach(param => {
-      const [key] = param.split("=");
-      if (key) {
-        const isOptional = key.startsWith("_");
-        const paramField = document.createElement("div");
-        paramField.innerHTML = `
-          <label class="block text-sm font-medium text-slate-700 mb-1">${key.capitalize()}</label>
-          <input type="text" id="param-${key}" class="input-field" placeholder="Enter ${key}${isOptional ? " (optional)" : ""}">
-          <div id="error-${key}" class="text-red-500 text-xs mt-1 hidden">This field is required</div>
-        `;
-        paramsContainer.appendChild(paramField);
-      }
-    });
-
+    if (urlParams.length) {
+      urlParams.forEach(param => {
+        const [key] = param.split("=");
+        if (key) {
+          const isOptional = key.startsWith("_");
+          const paramField = document.createElement("div");
+          paramField.className = "mb-3";
+          paramField.innerHTML = `
+            <input type="text" id="param-${key}" class="input-field" placeholder="Enter ${key}${isOptional ? " (optional)" : ""}">
+            <div id="error-${key}" class="text-red-500 text-xs mt-1 hidden">This field is required</div>
+          `;
+          paramsContainer.appendChild(paramField);
+        }
+      });
+    }
+    
     // Handle path parameters (placeholders like {param})
     const placeholderMatch = endpoint.match(/{([^}]+)}/g);
     if (placeholderMatch) {
@@ -251,8 +253,8 @@ document.addEventListener("DOMContentLoaded", async function() {
         const paramName = match.replace(/{|}/g, "");
         const isOptional = paramName.startsWith("_");
         const paramField = document.createElement("div");
+        paramField.className = "mb-3";
         paramField.innerHTML = `
-          <label class="block text-sm font-medium text-slate-700 mb-1">${paramName.capitalize()}</label>
           <input type="text" id="param-${paramName}" class="input-field" placeholder="Enter ${paramName}${isOptional ? " (optional)" : ""}">
           <div id="error-${paramName}" class="text-red-500 text-xs mt-1 hidden">This field is required</div>
         `;
@@ -287,7 +289,7 @@ document.addEventListener("DOMContentLoaded", async function() {
       document.querySelectorAll('[id^="error-"]').forEach(errorElement => {
         errorElement.classList.add("hidden");
       });
-
+      
       const paramInputs = paramsContainer.querySelectorAll("input");
       paramInputs.forEach(input => {
         const paramName = input.id.replace("param-", "");
@@ -314,21 +316,23 @@ document.addEventListener("DOMContentLoaded", async function() {
       try {
         let apiUrl = endpoint;
         
-        // Replace path parameters
-        paramInputs.forEach(input => {
-          const paramName = input.id.replace("param-", "");
-          const paramValue = input.value.trim();
-          if (paramName.startsWith("_") && paramValue === "") {
-            return;
-          }
-          if (apiUrl.includes(`{${paramName}}`)) {
-            apiUrl = apiUrl.replace(`{${paramName}}`, encodeURIComponent(paramValue));
-          } else if (paramValue !== "") {
-            const urlObj = new URL(apiUrl, window.location.origin);
-            urlObj.searchParams.set(paramName, paramValue);
-            apiUrl = urlObj.pathname + urlObj.search;
-          }
-        });
+        // Replace path parameters and handle query parameters
+        if (paramInputs.length > 0) {
+          Array.from(paramInputs).forEach(input => {
+            const paramName = input.id.replace("param-", "");
+            const paramValue = input.value.trim();
+            if (paramName.startsWith("_") && paramValue === "") {
+              return;
+            }
+            if (apiUrl.includes(`{${paramName}}`)) {
+              apiUrl = apiUrl.replace(`{${paramName}}`, encodeURIComponent(paramValue));
+            } else if (paramValue !== "") {
+              const urlObj = new URL(apiUrl, window.location.origin);
+              urlObj.searchParams.set(paramName, paramValue);
+              apiUrl = urlObj.pathname + urlObj.search;
+            }
+          });
+        }
         
         const fullUrl = new URL(apiUrl, window.location.origin).href;
         const urlDisplayDiv = document.createElement("div");
