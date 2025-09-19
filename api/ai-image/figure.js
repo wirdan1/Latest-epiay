@@ -3,7 +3,7 @@ const {
   GoogleGenerativeAI: GenerativeModel
 } = require("@google/generative-ai");
 const axios = require("axios");
-const FIGURE_PROMPT = "Using the nano-banana model, a commercial 1/7 scale figurine of the character in the picture was created, depicting a realistic style and a realistic environment. The figurine is placed on a computer desk with a round transparent acrylic base. There is no text on the base. The computer screen shows the Zbrush modeling process of the figurine. Next to the computer screen is a BANDAI-style toy box with the original painting printed on it.";
+const FIGURE_PROMPT = "Using the nano-banana model, a commercial 1/7 scale figurine of the character in the picture was created, depicting a realistic style with high-quality painting and detailed sculpt. The figurine is placed on a computer desk with a round transparent acrylic base. There is no text on the base. On the monitor behind it, the Blender 3D modeling process of the figurine is displayed with both wireframe and shaded views. Next to the monitor is a premium toy box designed like a collector’s edition package, with the character artwork and a transparent plastic window showing the figurine inside.";
 module.exports = {
   name: "figurekan",
   desc: "Ubah karakter menjadi berfigure dengan AI",
