@@ -9,7 +9,7 @@
   <title>Hookrest API</title>
   <!-- Font Inter dengan fallback yang lebih baik -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href=" https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <style>
     :root {
       --primary: #646cff;
@@ -429,6 +429,51 @@
       font-size: 0.9rem;
     }
 
+    /* Cursor Follower Styles */
+    .cursor-follower {
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(100, 108, 255, 0.4);
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      transition: width 0.2s, height 0.2s, background 0.2s, opacity 0.5s;
+      mix-blend-mode: screen;
+      display: none;
+      backdrop-filter: blur(2px);
+      border: 1px solid rgba(100, 108, 255, 0.6);
+      box-shadow: 0 0 10px rgba(100, 108, 255, 0.3);
+      opacity: 0;
+    }
+
+    .cursor-follower.active {
+      display: block;
+      opacity: 1;
+    }
+
+    .cursor-follower.dragging {
+      width: 25px;
+      height: 25px;
+      background: rgba(139, 92, 246, 0.5);
+      transform: translate(-50%, -50%) scale(1.1);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Particle Styles */
+    .particle {
+      position: fixed;
+      pointer-events: none;
+      z-index: 9998;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+      opacity: 0.8;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: screen;
+    }
+
+    /* Tambahkan gaya untuk mode mobile/touch */
     @media (max-width: 768px) {
       .nav-links {
         display: none;
@@ -466,11 +511,24 @@
         padding: 8px 16px;
         font-size: 0.9rem;
       }
+      
+      .cursor-follower {
+        width: 15px;
+        height: 15px;
+      }
+      
+      .cursor-follower.dragging {
+        width: 20px;
+        height: 20px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <div class="cursor-follower"></div>
+  <div id="particles-container"></div>
+  
   <header>
     <div class="container nav-container">
       <a href="#" class="logo">
@@ -480,7 +538,7 @@
       <nav class="nav-links">
         <a href="#features">Features</a>
         <a href="/docs">Documentation</a>
-        <a href="https://github.com/Wirdan1">GitHub</a>
+        <a href=" https://github.com/Wirdan1 ">GitHub</a>
       </nav>
       <button class="mobile-menu-btn">
         <i class="material-icons">menu</i>
@@ -534,21 +592,21 @@
         <div class="track">
           <h3>Love nwantiti</h3>
           <audio controls>
-            <source src="https://qu.ax/MMtYy.mp3" type="audio/mpeg">
+            <source src="https://qu.ax/MMtYy.mp3 " type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
         </div>
         <div class="track">
           <h3>Blue</h3>
           <audio controls>
-            <source src="https://qu.ax/dhHBV.mp3" type="audio/mpeg">
+            <source src="https://qu.ax/dhHBV.mp3 " type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
         </div>
         <div class="track">
           <h3>Bonus</h3>
           <audio controls>
-            <source src="https://qu.ax/BTStv.mp3" type="audio/mpeg">
+            <source src="https://qu.ax/BTStv.mp3 " type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
         </div>
@@ -636,6 +694,204 @@
         toggleBtn.innerHTML = '<i class="material-icons">volume_off</i><span>Hide Background Music</span>';
       }
     });
+    
+    // Cursor Follower with Particles and Smooth Movement
+    const cursorFollower = document.querySelector('.cursor-follower');
+    const particlesContainer = document.getElementById('particles-container');
+    let isDragging = false;
+    let currentX = 0;
+    let currentY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    let isCursorActive = false;
+    let inactiveTimer = null;
+    const particles = [];
+    const maxParticles = 50;
+    
+    // Easing function for smooth movement
+    function easeOutExpo(x) {
+      return x === 1 ? 1 : 1 - Math.pow(2, -10 * x);
+    }
+    
+    // Mouse movement with smooth following
+    document.addEventListener('mousemove', (e) => {
+      targetX = e.clientX;
+      targetY = e.clientY;
+      
+      activateCursor();
+      
+      // Create particle when dragging
+      if (isDragging) {
+        createParticle(e.clientX, e.clientY);
+      }
+    });
+    
+    // Mouse down (start dragging)
+    document.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      cursorFollower.classList.add('dragging');
+      activateCursor();
+    });
+    
+    // Mouse up (stop dragging)
+    document.addEventListener('mouseup', (e) => {
+      isDragging = false;
+      cursorFollower.classList.remove('dragging');
+      resetInactiveTimer();
+    });
+    
+    // Touch events for mobile
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        targetX = touch.clientX;
+        targetY = touch.clientY;
+        isDragging = true;
+        cursorFollower.classList.add('dragging');
+        activateCursor();
+        
+        // Create particle on touch
+        createParticle(touch.clientX, touch.clientY);
+      }
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (e.touches.length > 0 && isDragging) {
+        const touch = e.touches[0];
+        targetX = touch.clientX;
+        targetY = touch.clientY;
+        
+        // Create particle while dragging
+        createParticle(touch.clientX, touch.clientY);
+      }
+    });
+    
+    document.addEventListener('touchend', (e) => {
+      isDragging = false;
+      cursorFollower.classList.remove('dragging');
+      resetInactiveTimer();
+    });
+    
+    // Show cursor follower on first interaction
+    function activateCursor() {
+      if (!isCursorActive) {
+        cursorFollower.classList.add('active');
+        isCursorActive = true;
+      }
+      
+      // Reset the timer for hiding cursor
+      resetInactiveTimer();
+    }
+    
+    function resetInactiveTimer() {
+      if (inactiveTimer) {
+        clearTimeout(inactiveTimer);
+      }
+      
+      inactiveTimer = setTimeout(() => {
+        cursorFollower.classList.remove('active');
+        isCursorActive = false;
+      }, 2000); // Hide after 2 seconds of inactivity
+    }
+    
+    // Create particle effect
+    function createParticle(x, y) {
+      // Limit the number of particles for performance
+      if (particles.length > maxParticles) {
+        const oldParticle = particles.shift();
+        if (oldParticle && oldParticle.parentNode) {
+          oldParticle.parentNode.removeChild(oldParticle);
+        }
+      }
+      
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      // Random size between 3px and 8px
+      const size = Math.random() * 5 + 3;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      
+      // Position
+      particle.style.left = `${x}px`;
+      particle.style.top = `${y}px`;
+      
+      // Random color (variations of primary and secondary)
+      const hue = Math.random() * 60 + 240; // Blue to purple range
+      particle.style.background = `radial-gradient(circle, hsla(${hue}, 80%, 60%, 0.8) 0%, transparent 70%)`;
+      
+      // Add to DOM
+      particlesContainer.appendChild(particle);
+      particles.push(particle);
+      
+      // Animation
+      const duration = Math.random() * 1000 + 500; // 0.5s to 1.5s
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 50 + 20;
+      const xDest = x + Math.cos(angle) * distance;
+      const yDest = y + Math.sin(angle) * distance;
+      
+      // Animate the particle
+      let startTime = null;
+      function animateParticle(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const progress = (timestamp - startTime) / duration;
+        
+        if (progress < 1) {
+          particle.style.left = `${x + (xDest - x) * progress}px`;
+          particle.style.top = `${y + (yDest - y) * progress}px`;
+          particle.style.opacity = 1 - progress;
+          particle.style.transform = `translate(-50%, -50%) scale(${1 + progress})`;
+          
+          requestAnimationFrame(animateParticle);
+        } else {
+          // Remove particle when animation completes
+          if (particle.parentNode) {
+            particle.parentNode.removeChild(particle);
+          }
+          const index = particles.indexOf(particle);
+          if (index > -1) {
+            particles.splice(index, 1);
+          }
+        }
+      }
+      
+      requestAnimationFrame(animateParticle);
+    }
+    
+    // Smooth animation loop for cursor
+    function smoothCursorAnimation() {
+      // Calculate distance to target
+      const dx = targetX - currentX;
+      const dy = targetY - currentY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+      
+      // If we're close enough, snap to target
+      if (distance < 0.5) {
+        currentX = targetX;
+        currentY = targetY;
+      } else {
+        // Use easing for smooth movement
+        // Higher speed when dragging, slower when just moving
+        const baseSpeed = isDragging ? 0.25 : 0.15;
+        const speed = Math.min(baseSpeed + distance * 0.001, 0.5);
+        currentX += dx * speed;
+        currentY += dy * speed;
+      }
+      
+      // Update cursor position
+      cursorFollower.style.transform = `translate(-50%, -50%) translate(${currentX}px, ${currentY}px)`;
+      
+      // Continue animation
+      requestAnimationFrame(smoothCursorAnimation);
+    }
+    
+    // Start the smooth animation loop
+    requestAnimationFrame(smoothCursorAnimation);
+    
+    // Initialize event listeners for cursor activation
+    document.addEventListener('mousemove', activateCursor, { once: true });
+    document.addEventListener('touchstart', activateCursor, { once: true });
   </script>
 </body>
 
