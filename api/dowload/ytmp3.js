@@ -16,8 +16,9 @@ module.exports = {
     }
 
     try {
-      // Panggil API pihak ketiga
-      const apiUrl = `https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(url)}`;
+      const apiUrl = `https://api.yupra.my.id/api/downloader/ytmp3?url=${encodeURIComponent(
+        url
+      )}`;
       const response = await axios.get(apiUrl);
       const data = response.data;
 
@@ -30,31 +31,25 @@ module.exports = {
 
       const result = data.result;
 
-      // Ambil file audio dalam bentuk buffer
-      const buffer = Buffer.from(
-        (await axios.get(result.link, { responseType: "arraybuffer" })).data
-      );
-
-      // Info meta
+      // meta info
       const meta = {
         title: result.title || "-",
         duration: result.duration || "-",
         size: result.filesize
           ? (result.filesize / 1024 / 1024).toFixed(2) + " MB"
           : "-",
-        status: result.status || "-"
+        status: result.status || "-",
+        progress: result.progress || 0
       };
 
-      // Kirim hasil
       res.setHeader("Content-Type", "application/json");
       return res.json({
         status: true,
         meta,
-        file: {
-          fileName: `${result.title}.mp3`,
-          mimeType: "audio/mpeg",
-          size: buffer.length,
-          base64: buffer.toString("base64") // kamu bisa kirim link download kalau mau, bukan base64
+        download: {
+          title: result.title || "audio",
+          url: result.link,
+          mimeType: "audio/mpeg"
         }
       });
     } catch (err) {
