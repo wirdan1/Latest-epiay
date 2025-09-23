@@ -3,7 +3,7 @@ const axios = require("axios");
 module.exports = {
   name: "Lyrics",
   desc: "Mencari lirik lagu berdasarkan judul",
-  category: "Music",
+  category: "Search",
   params: ["title"],
   async run(req, res) {
     const { title } = req.query;
