@@ -125,7 +125,7 @@ API_KEY=your_secret_key_here
 
 ### Base URL
 ```
-https://api.hookrest.com/v1
+https://api.hookrest.my.id
 ```
 
 ### Example Endpoints
