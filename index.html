@@ -236,6 +236,27 @@
       color: var(--primary);
     }
 
+    /* Gaya untuk tombol donasi */
+    .btn-donate {
+      background: var(--warning); /* Warna kuning untuk menarik perhatian */
+      color: white;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-donate:hover {
+      background: #d97706; /* Warna kuning yang lebih gelap saat hover */
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px -5px rgba(245, 158, 11, 0.3);
+    }
+
+    .mobile-donate {
+      display: none;
+    }
+
     .api-info {
       margin-bottom: 80px;
     }
@@ -521,6 +542,17 @@
         width: 20px;
         height: 20px;
       }
+
+      .btn-donate {
+        display: none; /* Sembunyikan tombol donasi di header pada mode mobile */
+      }
+
+      .mobile-donate {
+        display: flex;
+        margin-top: 10px;
+        width: 100%;
+        justify-content: center;
+      }
     }
   </style>
 </head>
@@ -538,8 +570,16 @@
       <nav class="nav-links">
         <a href="#features">Features</a>
         <a href="/docs">Documentation</a>
-        <a href=" https://github.com/Wirdan1 ">GitHub</a>
+        <a href="https://github.com/Wirdan1">GitHub</a>
+        <a href="https://saweria.co/hookrest" class="btn btn-donate mobile-donate" target="_blank" rel="noopener noreferrer">
+          <i class="material-icons">favorite</i>
+          Donate
+        </a>
       </nav>
+      <a href="YOUR_SAWERIA_LINK_HERE" class="btn btn-donate" target="_blank" rel="noopener noreferrer">
+        <i class="material-icons">favorite</i>
+        Donate
+      </a>
       <button class="mobile-menu-btn">
         <i class="material-icons">menu</i>
       </button>
@@ -592,21 +632,21 @@
         <div class="track">
           <h3>Love nwantiti</h3>
           <audio controls>
-            <source src="https://qu.ax/MMtYy.mp3 " type="audio/mpeg">
+            <source src="https://qu.ax/MMtYy.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
         </div>
         <div class="track">
           <h3>Blue</h3>
           <audio controls>
-            <source src="https://qu.ax/dhHBV.mp3 " type="audio/mpeg">
+            <source src="https://qu.ax/dhHBV.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
         </div>
         <div class="track">
           <h3>Bonus</h3>
           <audio controls>
-            <source src="https://qu.ax/BTStv.mp3 " type="audio/mpeg">
+            <source src="https://qu.ax/BTStv.mp3" type="audio/mpeg">
             Your browser does not support the audio element.
           </audio>
         </div>
