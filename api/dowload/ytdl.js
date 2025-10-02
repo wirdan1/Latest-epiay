@@ -1,4 +1,4 @@
-// PLUGIN: YTDOWN
+// PLUGIN: YT Downloader
 // TYPE: CJS
 
 const axios = require("axios");
@@ -12,21 +12,12 @@ async function getFinalFileUrl(mediaUrl) {
     cookie: "PHPSESSID=ofu9rbop984f7ovqdsp72q9t82",
     origin: "https://ytdown.io",
     referer: "https://ytdown.io/en/",
-    "sec-ch-ua":
-      '"Chromium";v="127", "Not)A;Brand";v="99", "Microsoft Edge Simulate";v="127", "Lemur";v="127"',
-    "sec-ch-ua-mobile": "?1",
-    "sec-ch-ua-platform": '"Android"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
     "user-agent":
       "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36",
     "x-requested-with": "XMLHttpRequest",
   };
   const data = qs.stringify({ url: mediaUrl });
-  const resp = await axios.post("https://ytdown.io/proxy.php", data, {
-    headers,
-  });
+  const resp = await axios.post("https://ytdown.io/proxy.php", data, { headers });
   return resp.data.api.fileUrl;
 }
 
@@ -38,36 +29,22 @@ async function ytdown(fullUrl) {
     cookie: "PHPSESSID=ofu9rbop984f7ovqdsp72q9t82",
     origin: "https://ytdown.io",
     referer: "https://ytdown.io/en/",
-    "sec-ch-ua":
-      '"Chromium";v="127", "Not)A;Brand";v="99", "Microsoft Edge Simulate";v="127", "Lemur";v="127"',
-    "sec-ch-ua-mobile": "?1",
-    "sec-ch-ua-platform": '"Android"',
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
     "user-agent":
       "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36",
     "x-requested-with": "XMLHttpRequest",
   };
 
   const phaseOneData = qs.stringify({ url: fullUrl });
-  const phaseOneResp = await axios.post(
-    "https://ytdown.io/proxy.php",
-    phaseOneData,
-    { headers }
-  );
+  const phaseOneResp = await axios.post("https://ytdown.io/proxy.php", phaseOneData, { headers });
   const resPhase1 = phaseOneResp.data.api;
 
   const downloadsVideo = [];
+  const downloadsAudio = [];
 
   if (resPhase1.mediaItems) {
     for (const item of resPhase1.mediaItems) {
       if (item.type.toLowerCase() === "video") {
-        if (
-          ["640x360", "854x480", "1280x720", "1920x1080"].includes(
-            item.mediaRes
-          )
-        ) {
+        if (["640x360", "854x480", "1280x720", "1920x1080"].includes(item.mediaRes)) {
           const finalUrl = await getFinalFileUrl(item.mediaUrl);
           downloadsVideo.push({
             quality:
@@ -85,6 +62,15 @@ async function ytdown(fullUrl) {
             thumbnail: item.mediaThumbnail,
           });
         }
+      } else if (item.type.toLowerCase() === "audio") {
+        const finalUrl = await getFinalFileUrl(item.mediaUrl);
+        downloadsAudio.push({
+          quality: item.mediaRes || "128kbps",
+          size: item.mediaFileSize,
+          extension: item.mediaExtension,
+          url: finalUrl,
+          thumbnail: item.mediaThumbnail,
+        });
       }
     }
   }
@@ -103,12 +89,13 @@ async function ytdown(fullUrl) {
       avatar: resPhase1.userInfo?.userAvatar || null,
     },
     downloadsVideo: downloadsVideo.length ? downloadsVideo : null,
+    downloadsAudio: downloadsAudio.length ? downloadsAudio : null,
   };
 }
 
 module.exports = {
-  name: "YouTube Downloader",
-  desc: "Download video YouTube dengan berbagai resolusi",
+  name: "YT Downloader",
+  desc: "Download video/audio dari YouTube (via ytdown.io)",
   category: "Downloader",
   params: ["url"],
   async run(req, res) {
@@ -126,10 +113,9 @@ module.exports = {
       const result = await ytdown(url);
       return res.json(result);
     } catch (err) {
-      console.error("[YTDOWN ERROR]", err);
       return res.status(500).json({
         status: false,
-        error: "Gagal memproses permintaan",
+        error: "Gagal download video",
         message: err.message,
       });
     }
