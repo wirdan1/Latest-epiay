@@ -83,7 +83,7 @@ async function askBlackbox(prompt) {
 module.exports = {
   name: "BlackboxAI",
   desc: "Tanya ke AI Blackbox",
-  category: "AI",
+  category: "Ai",
   params: ["text"],
   async run(req, res) {
     try {
