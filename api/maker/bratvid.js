@@ -8,6 +8,7 @@ async function generateBratVideo(text) {
     const params = new URLSearchParams();
     params.append("text", text);
 
+    // Request ke API utama
     const response = await axios.get(
       `https://raolbyte-brat.hf.space/maker/bratvid?${params.toString()}`,
       {
@@ -18,12 +19,21 @@ async function generateBratVideo(text) {
       }
     );
 
-    // Ambil hanya video_url
-    if (response.data && response.data.video_url) {
-      return response.data.video_url;
-    } else {
+    // Pastikan response valid
+    if (!response.data || !response.data.video_url) {
       throw new Error("Invalid response dari BRATVID API");
     }
+
+    // Ambil file video dalam bentuk buffer
+    const videoResponse = await axios.get(response.data.video_url, {
+      responseType: "arraybuffer",
+      timeout: 60000,
+      headers: {
+        "User-Agent": "Raol-APIs/2.0.0",
+      },
+    });
+
+    return Buffer.from(videoResponse.data);
   } catch (error) {
     console.error("Error generate BRAT video:", error);
 
@@ -42,7 +52,7 @@ async function generateBratVideo(text) {
 module.exports = {
   name: "BratVid Generator",
   desc: "Buat video BRAT dari teks (tanpa warna/background)",
-  category: "Maker",
+  category: "Generator",
   params: ["text"],
   async run(req, res) {
     try {
@@ -62,12 +72,14 @@ module.exports = {
         });
       }
 
-      const bratvid = await generateBratVideo(text);
+      const videoBuffer = await generateBratVideo(text);
 
-      return res.json({
-        status: true,
-        bratvid,
-      });
+      res.setHeader("Content-Type", "video/mp4");
+      res.setHeader("Content-Length", videoBuffer.length);
+      res.setHeader("Cache-Control", "public, max-age=3600");
+      res.setHeader("Content-Disposition", `inline; filename="bratvid_${Date.now()}.mp4"`);
+
+      return res.end(videoBuffer);
     } catch (err) {
       return res.status(500).json({
         status: false,
