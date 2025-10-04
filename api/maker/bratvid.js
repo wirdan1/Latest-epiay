@@ -3,13 +3,10 @@
 
 const axios = require("axios");
 
-async function generateBratVideo(text, background = null, color = null) {
+async function generateBratVideo(text) {
   try {
     const params = new URLSearchParams();
     params.append("text", text);
-
-    if (background) params.append("background", background);
-    if (color) params.append("color", color);
 
     const response = await axios.get(
       `https://raolbyte-brat.hf.space/maker/bratvid?${params.toString()}`,
@@ -21,8 +18,9 @@ async function generateBratVideo(text, background = null, color = null) {
       }
     );
 
+    // Ambil hanya video_url
     if (response.data && response.data.video_url) {
-      return response.data.video_url; // hanya ambil URL-nya
+      return response.data.video_url;
     } else {
       throw new Error("Invalid response dari BRATVID API");
     }
@@ -43,12 +41,12 @@ async function generateBratVideo(text, background = null, color = null) {
 
 module.exports = {
   name: "BratVid Generator",
-  desc: "Buat video BRAT dari teks",
-  category: "Generator",
-  params: ["text", "background", "color"],
+  desc: "Buat video BRAT dari teks (tanpa warna/background)",
+  category: "Maker",
+  params: ["text"],
   async run(req, res) {
     try {
-      const { text, background, color } = req.query;
+      const { text } = req.query;
 
       if (!text) {
         return res.status(400).json({
@@ -64,25 +62,11 @@ module.exports = {
         });
       }
 
-      if (background && !/^#[0-9A-Fa-f]{6}$/.test(background)) {
-        return res.status(400).json({
-          status: false,
-          error: "Format warna background harus hex (contoh: #000000)",
-        });
-      }
-
-      if (color && !/^#[0-9A-Fa-f]{6}$/.test(color)) {
-        return res.status(400).json({
-          status: false,
-          error: "Format warna teks harus hex (contoh: #FFFFFF)",
-        });
-      }
-
-      const videoUrl = await generateBratVideo(text, background, color);
+      const bratvid = await generateBratVideo(text);
 
       return res.json({
         status: true,
-        bratvid: videoUrl, // hanya return URL
+        bratvid,
       });
     } catch (err) {
       return res.status(500).json({
