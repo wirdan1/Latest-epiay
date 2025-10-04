@@ -52,7 +52,7 @@ async function generateBratVideo(text) {
 module.exports = {
   name: "BratVid Generator",
   desc: "Buat video BRAT dari teks (tanpa warna/background)",
-  category: "Generator",
+  category: "Maker",
   params: ["text"],
   async run(req, res) {
     try {
